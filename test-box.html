@@ -1,0 +1,52 @@
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+  <title>Test Overlaying Boxes</title>
+  <style type="text/css">
+      #blueRectangle {
+          background: blue;
+          height: 50px;
+          width: 10px;
+          position: absolute;
+      }
+
+  </style>
+
+  <script type="text/javascript">
+    function moveRight() {
+      console.log("Moving right");
+      var rectangle = document.getElementById("blueRectangle");
+      console.log("position is currently (" + rectangle.style.left + ")");
+      var left = rectangle.style.left
+      rectangle.style.left = left + 100;
+    }
+    function moveLeft() {
+
+    }
+    function onLoad() {
+        var rectangle = document.getElementById("blueRectangle");
+        rectangle.style.left = 10;
+    }
+  </script>
+</head>
+
+<body onload="onLoad()">
+
+Create an 80 column line
+<div>
+<div id="blueRectangle"></div>
+<pre>
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+</pre>
+</div>
+
+<input type="button" onclick="moveLeft()" value="Move Left"/>
+<input type="button" onclick="moveRight()" value="Move Right"/>
+
+</body>
+
+</html>

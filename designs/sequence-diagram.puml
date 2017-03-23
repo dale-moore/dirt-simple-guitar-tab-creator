@@ -1,0 +1,78 @@
+@startuml
+
+actor user
+
+user -> page : opens HTML page
+activate page
+page -> initializeNotes : onload event
+activate initializeNotes
+note right of initializeNotes
+  initialize all string
+  arrays with all "-".
+end note
+
+initializeNotes -> displayFretBoard : calls ........................
+activate displayFretBoard
+note right of displayFretBoard
+  for each string call
+  displayFretBoardString
+end note
+
+displayFretBoard -> displayFretBoardString : display_element, array
+activate displayFretBoardString
+
+displayFretBoardString -> getSpacesBetweenNote
+activate getSpacesBetweenNote
+displayFretBoardString <- getSpacesBetweenNote : string of dashes for each space
+deactivate getSpacesBetweenNote
+
+note right of displayFretBoardString
+  update the HTML element
+  that represents a guitar
+  string with the notes.
+end note
+
+displayFretBoard <- displayFretBoardString
+deactivate displayFretBoardString
+
+initializeNotes <- displayFretBoard
+deactivate displayFretBoard
+
+page <- initializeNotes
+deactivate initializeNotes
+deactivate page
+
+== adding notes ==
+user -> page : enters note for string
+activate page
+page -> isGuitarString : onkeypress event
+activate isGuitarString
+isGuitarString -> addNotesToFret
+activate addNotesToFret
+  note right of addNotesToFret
+  Get value of notes and
+  update arrays.
+end note
+addNotesToFreg -> getNoteValue: element
+activate getNoteValue
+addNotesToFreg <- getNoteValue : return char value
+deactivate getNoteValue
+addNotesToFret -> displayFretBoard
+activate displayFretBoard
+displayFretBoard -> displayFretBoardString
+activate displayFretBoardString
+displayFretBoard <- displayFretBoardString
+deactivate displayFretBoardString
+addNotesToFret <- displayFretBoard
+deactivate displayFretBoard
+isGuitarString <- addNotesToFret
+deactivate addNotesToFret
+page <- isGuitarString : returns true or false
+deactivate isGuitarString
+deactivate page
+
+== edit notes ==
+user -> page : presses next
+
+
+@enduml
