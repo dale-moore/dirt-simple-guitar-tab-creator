@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 
+    <!-- load an external font so we can us it when displaying the tab -->
+    <link type="text/css" href="https://fonts.googleapis.com/css?family=Source+Code+Pro:300,400,700" rel="stylesheet">
+
 <!--
 TODO - add description
 TODO - add author
@@ -10,6 +13,55 @@ TODO - add dev notes.
 
 This code follows the Google JavaScript Style Guide.
 https://google.github.io/styleguide/javascriptguide.xml
+
+
+
+Strumming patterns:
+not length ???
+_ up
+^ down
+
+Typical 4 quarter notes shows down strumming on each note
+1 & 2 & 3 & 4 & | 1 & 2 & 3 & 4 &
+_   _   _   _
+
+1 & 2 & 3 & 4 &
+
+Standard Tab notation:
+e|-------------15----14----|-------------15----14----|
+B|----15-------------------|----15-------------------|
+G|-------14-12----14----14-|-------14-12----14----14-|
+D|-12----------------------|-12----------------------| x2
+A|-------------------------|-------------------------|
+E|-------------------------|-------------------------|
+
+Song part
+[Intro]
+[Chorus]
+
+Only include the symbols used.
+***********************************
+| /   Slide up
+| \   Slide down
+| h   Hummer-on
+| p   Pull-off
+| ~   Vibrato
+| +   Harmonic
+| x   Dead note
+| b   Bend
+| pb  Pre-bend
+| br  Bend release
+| pbr Pre-bend release
+| brb Bend release bend
+***********************************
+
+N.C. means no chord.
+
+Chords:
+Am 577555
+Em7 x79787
+Cmaj7 x-x-10-12-12-12
+
  -->
 
 <script language="javascript">
@@ -32,17 +84,21 @@ https://google.github.io/styleguide/javascriptguide.xml
 	// improve the readability.
 	
 	// TODO - we need to include an import mechanism based on
-	// a standard ASDII tab format so that songs can be reimported
+	// a standard ASCII tab format so that songs can be reimported
 	// and modified easily.  https://en.wikipedia.org/wiki/Tablature
 	
 	
 	// This is the note that is being modified.  Of course we start on the first note.
 	var gbl_note_index = 0;
-	// We only support 20 notes on the staff.
-	var gbl_max_notes = 20;
+	// Calculated during onLoad.  This field defines how many
+    // notes can be added to the staff if each note only take
+    // 1 char.
+	var gbl_max_notes = 37;
 	// We want 2 spaces on either side of the note.
-	var gbl_spaces_between_notes = 2;	// --*--
-	
+	var gbl_min_space_between_notes = 1;
+	// This is the maximum line length
+	var gbl_line_length = 111;
+
 	
 	function addNotesToFret() {	
 		console.log("addNotesToFret called")
@@ -65,34 +121,112 @@ https://google.github.io/styleguide/javascriptguide.xml
 						
 		displayFretBoard();
 	}
-	
-	
-	function displayFretBoard() {
-		displayFretBoardString("x_string", gbl_x_array);
-		displayFretBoardString("b_string", gbl_b_array);
-		displayFretBoardString("g_string", gbl_g_array);
-		displayFretBoardString("d_string", gbl_d_array);
-		displayFretBoardString("a_string", gbl_a_array);
-		displayFretBoardString("e_string", gbl_e_array);
-						
-		updateRemainingStatus();
+
+	/**
+	 * This function returns the longest note from all the notes provided for this beat.  The longest
+	 * note is literally the note that has the most characters.
+	 */
+	function calculateLongestNoteLength(x_note, b_note, g_note, d_note, a_note, e_note) {
+        var longestNoteLength = 1;
+        if (x_note.length>longestNoteLength) {
+            longestNoteLength = x_note.length;
+        }
+        if (b_note.length>longestNoteLength) {
+            longestNoteLength = b_note.length;
+        }
+        if (g_note.length>longestNoteLength) {
+            longestNoteLength = g_note.length;
+        }
+        if (d_note.length>longestNoteLength) {
+            longestNoteLength = d_note.length;
+        }
+        if (a_note.length>longestNoteLength) {
+            longestNoteLength = a_note.length;
+        }
+        if (e_note.length>longestNoteLength) {
+            longestNoteLength = e_note.length;
+        }
+        return longestNoteLength;
 	}
 	
-	
-	function displayFretBoardString(element_name, array) {
-		var display_element = document.getElementById(element_name)
-		display_element.innerHTML = "";
-		var output = "";
-		for (i=0; i<20; i++) {
-			var note_value = array[i].trim();
-			if (note_value == " ") {
-				note_value = "-";
-			}
-			output += getSpacesBetweenNote() + note_value;
+	/**
+	 * This function writes the fret board to the UI.
+	 */
+	function displayFretBoard() {
+
+        document.getElementById("x_string").innerHTML = "";
+        document.getElementById("b_string").innerHTML = "";
+        document.getElementById("g_string").innerHTML = "";
+        document.getElementById("d_string").innerHTML = "";
+        document.getElementById("a_string").innerHTML = "";
+        document.getElementById("e_string").innerHTML = "";
+
+	    // Do not show more than 113 characters since ultimate-guitar has that restriction
+        // for tab submission.
+	    for (var i=0; i<gbl_max_notes; i++) {
+	        // Get the note from the arrays.
+			var xNote = gbl_x_array[i];
+            var bNote = gbl_b_array[i];
+            var gNote = gbl_g_array[i];
+            var dNote = gbl_d_array[i];
+            var aNote = gbl_a_array[i];
+            var eNote = gbl_e_array[i];
+
+            // Calculate the longest note
+            var longestNoteLength = calculateLongestNoteLength(xNote.trim(), bNote.trim(), gNote.trim(), dNote.trim(), aNote.trim(), eNote.trim());
+
+            // Display the notes
+//            console.log("Displaying (e) string for note index(" + i + ")");
+            displayFretBoardNote("x_string", xNote, longestNoteLength, false);
+//            console.log("Displaying (B) string for note index(" + i + ")");
+            displayFretBoardNote("b_string", bNote, longestNoteLength, false);
+//            console.log("Displaying (G) string for note index(" + i + ")");
+            displayFretBoardNote("g_string", gNote, longestNoteLength, false);
+//            console.log("Displaying (D) string for note index(" + i + ")");
+            displayFretBoardNote("d_string", dNote, longestNoteLength, false);
+//            console.log("Displaying (A) string for note index(" + i + ")");
+            displayFretBoardNote("a_string", aNote, longestNoteLength, false);
+//            console.log("Displaying (E) string for note index(" + i + ")");
+            displayFretBoardNote("e_string", eNote, longestNoteLength, false);
 		}
+
+	}
+	
+
+    /**
+     *  displayFretBoardString.
+	 *  Each note has up to 3 "-"'s on either side.  The following is an example;
+	 *  -h22---1-22--1
+     *  --22-h22-/16-1
+     *  ---1-h22---4-1
+	 *
+     */
+	function displayFretBoardNote(element_name, note, max_note_length, debug) {
+        var display_element = document.getElementById(element_name)
+        var output = display_element.innerHTML;
+
+        var note_value = note.trim();
+        if (note_value.empty || note_value == " ") {
+            note_value = "-"
+        }
+
+        var spaces_before_note = max_note_length + gbl_min_space_between_notes - note_value.length;
+
+        if (debug == true && note != "-") {
+            console.log("Max note length(" + max_note_length +
+                ") note length(" + note_value.length +
+                ") spaces before note(" + spaces_before_note + ")");
+        }
+
+        for (var counter=0; counter<spaces_before_note; counter++) {
+            output += "-";
+        }
+
+		output += note_value;
+
 		display_element.innerHTML = output;
 	}
-	
+
 	
 	function getNoteValue(elementName) {
 		console.log("getNoteValue() called for element(" + elementName + ")")
@@ -104,49 +238,42 @@ https://google.github.io/styleguide/javascriptguide.xml
 		return value
 	}
 	
-	
-	function getSpacesBetweenNote() {
-		var spaces = "";
-		for (var counter=0; counter<gbl_spaces_between_notes; counter++) {
-			spaces += "-"
-		}
-		return spaces;
-	}
-	
-	
-	function initializeNotes() {
-				
-		// We allow up to 20 notes to be added so we'll initializeNotes
-		// all notes on all strings with null.
-		for (var x=0; x<20; x++) {
-			gbl_x_array.push(" ")
-			gbl_b_array.push(" ")
-			gbl_g_array.push(" ")
-			gbl_d_array.push(" ")
-			gbl_a_array.push(" ")
-			gbl_e_array.push(" ")
-		}
-		
-		displayFretBoard();	
-		updateNoteMarker();
-	}
+
 	
 	/**
 	 * This function is called when the user enters a character into the
 	 * edit boxes for each string to verify only
 	 * 0 through 6 are supported.
 	 */
-	function isGuitarString(evt, control) {
-		console.log("isGuitarString called with input(" + evt.keyCode + ")");
+	function isGuitarNote(evt, control) {
 		var charCode = (evt.which) ? evt.which : evt.keyCode;
 
+        if (charCode==13) {
+            // enter key pressed so use this as next
+        	addNotesToFret();
+            onNext();
+            return true;
+        }
+
+        console.log("pressed key code(" + charCode + ")");
+
 		// Verify the number is in the ASCII range of
-		// 48 which is decimal 0 and 54 which is decimal 6.
-        if (charCode < 48 || charCode > 54) {
-            // the character 'x' is also supported.  88 is uppercase X,
-			// 120 is lower case x and also 8 which is a backspace.
-			if (charCode != 88 && charCode != 120 && charCode != 8) {
+		// 48 which is decimal 0 and 57 which is decimal 9.
+        if (charCode < 48 || charCode > 57) {
+            // the character isn't a number so perform some additional checks.
+            if ((charCode != 88) &&   // x dead note
+                (charCode != 8) &&    // backspace
+                (charCode != 72) &&    // h
+                (charCode != 191) &&    // / forward slash
+                (charCode != 220) &&    // \ backslash
+                (charCode != 71) &&    // g
+                (charCode != 80) &&    // p
+                (charCode != 66) &&    // b
+                (charCode != 192) &&    // ~
+                (charCode != 220)) {    // | bar separator
+
 			    console.log("not a guitar string")
+                // clear the input
                 control.value = "";
 				return false;
 			}
@@ -155,7 +282,10 @@ https://google.github.io/styleguide/javascriptguide.xml
         return true;
 	}
 	
-	
+	/**
+     * This function uses the gbl_note_index to access the note arrays
+     * and show the values in the input boxes.
+     */
 	function loadNotesFromArray() {
 		console.log("loadNotesFromArray() called")
 		var x_note_value = gbl_x_array[gbl_note_index];
@@ -168,7 +298,8 @@ https://google.github.io/styleguide/javascriptguide.xml
 		console.log("guitar string values = high-e(" + x_note_value + "), b(" + b_note_value +
 			") g(" + g_note_value + ") d(" + d_note_value +
 			") a(" + a_note_value + ") low-e(" + e_note_value + ")");					
-			
+
+		// Update the input boxes for each notes
 		setNoteValue("x_note", x_note_value);
 		setNoteValue("b_note", b_note_value);
 		setNoteValue("g_note", g_note_value);
@@ -176,82 +307,97 @@ https://google.github.io/styleguide/javascriptguide.xml
 		setNoteValue("a_note", a_note_value);
 		setNoteValue("e_note", e_note_value);						
 	}
-	
-	
+
+
+    /**
+     * Called when the page loads.  This function calculates the number of notes
+     * that can fit on a line based upon the min spacing between notes.
+     */
+    function onLoad() {
+        gbl_max_notes = gbl_line_length / (gbl_min_space_between_notes + 1);
+        console.log("A maximum of (" + gbl_max_notes + ") notes can be added to each line.")
+
+        for (var x=0; x<gbl_max_notes; x++) {
+            gbl_x_array.push("-")
+            gbl_b_array.push("-")
+            gbl_g_array.push("-")
+            gbl_d_array.push("-")
+            gbl_a_array.push("-")
+            gbl_e_array.push("-")
+        }
+
+        displayFretBoard();
+        setFocusToFirstElement();
+        updateDisplayValues();
+    }
+
+    /**
+     * Called when user presses the NEXT button or the ENTER key
+     */
 	function onNext() {
 		gbl_note_index++;
 		if (gbl_note_index > (gbl_max_notes-1)) {
 			gbl_note_index = 0;
 		}	
 		loadNotesFromArray();
-		updateNoteMarker();
-		updateRemainingStatus();
+        setFocusToFirstElement();
+        updateDisplayValues();
 	}
-	
-	
+
+    /**
+     * Called when the user presses the back button.
+     */
 	function onPrevious() {
 		gbl_note_index--;
 		if (gbl_note_index < 0) {
 			gbl_note_index = (gbl_max_notes - 1)
 		}
 		loadNotesFromArray();
-		updateNoteMarker();
-		updateRemainingStatus();
+        setFocusToFirstElement();
+        updateDisplayValues();
 	}
-	
-	
-	
-	
-	function setNoteValue(elementName, value) {
-		console.log("setNoteValue() called for element(" + elementName + ") and value(" + value + ")")
-		var element = document.getElementById(elementName)
+
+    /**
+     * Set the focus to the (e) string input box.  This method
+     * is called when the page loads and when navigating between notes.
+     */
+	function setFocusToFirstElement() {
+        // Put cursor in top box
+        document.getElementById("x_note").focus();
+	}
+
+
+    /**
+     * This function sets the value into the HTML input box.
+     * @param elementId - ID of the input box
+     * @param value - the value to set
+     */
+	function setNoteValue(elementId, value) {
+		console.log("setNoteValue() called for element(" + elementId + ") and value(" + value + ")")
+		var element = document.getElementById(elementId)
+        if (value == "-") {
+		    value = " ";
+        }
 		element.value = value;		
 	}
-	
-	/*	
-	function setNote(element) {			
-		var state = false;
-		if (element.getAttribute("on")=="true") {
-			element.innerHTML = "---"
-			state = "false";
-		}
-		else {
-			element.innerHTML = "-*-"
-			state = "true";
-		}				
-		element.setAttribute("on", state);
-	}
-	*/
-	
-	
-	/**
-	 * This function is called when the note index is changed.
-	 * The function places an icon above the notes that are being changed
-	 * on the fret board.
-	 */
-	function updateNoteMarker() {
-		var display_element = document.getElementById("note_marker")
-		display_element.innerHTML = "";
-		var output = "--";
-		for (var i=0; i<gbl_note_index; i++) {			
-			output += getSpacesBetweenNote();
-		}
-		// place the marker
-		output += "<img src=\"./images/dot.png\"/>";
-		display_element.innerHTML = output;
-	}
-		
-	/**
-     * the remaining status is a field along the bottom of the 
-     * page that shows the user where the current index is into the
-     * staff of notes
-     */	 
-	function updateRemainingStatus() {
-		//var remaining = gbl_max_notes - gbl_note_index;
-		//var element = document.getElementById("remaining_status")
-		//element.innerHTML = remaining + " out of " + gbl_max_notes + " notes remaining"
-		//element.innerHTML = ""
-	}
+
+
+	function updateDisplayValues() {
+	    var element = document.getElementById("html_current_index");
+	    element.value = gbl_note_index;
+	    element.setAttribute("readonly", "true");
+
+        var element = document.getElementById("html_min_spaces");
+        element.value = gbl_min_space_between_notes;
+        element.setAttribute("readonly", "true");
+
+        var element = document.getElementById("html_max_line_length");
+        element.value = gbl_line_length;
+        element.setAttribute("readonly", "true");
+
+    }
+
+
 </script>
 
 <style type="text/css">
@@ -266,8 +412,10 @@ https://google.github.io/styleguide/javascriptguide.xml
     text-align: center;
 }
 .guitar-string-no-edit {
-	font-size: 14px;	
+	font-size: 16px;
 	display:  inline;
+    font-family: 'Source Code Pro', monospace;
+    font-weight: 300;
 }
 .add-button {
 	vertical-align: bottom;
@@ -278,45 +426,126 @@ https://google.github.io/styleguide/javascriptguide.xml
 .nav-button {
 	cursor: pointer;
 }
+/*#note-regular {*/
+    /*font-family: 'Source Code Pro', monospace;*/
+    /*font-size: 48px;*/
+    /*font-weight: 400;*/
+    /*display: inline;*/
+/*}*/
+.note-bold {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 48px;
+    font-weight: 700;
+    display: inline;
+}
+/*#note-light {*/
+    /*font-family: 'Source Code Pro', monospace;*/
+    /*font-size: 48px;*/
+    /*font-weight: 300;*/
+    /*display: inline;*/
+/*}*/
 </style>
 
 </head>
-<body onload="initializeNotes()">
+<body onload="onLoad()">
 
-<h1>Dirt Simple Guitar Tab Creator</h1>
+<h1>Guitar Tab Creator</h1>
 
 <hr/>
-Select each string for the note or select a chord to add. 
-<div>
+Enter the note for each string, tab between the string and press enter to add the
+note to the staff.
+<p></p>
 
-<div style="display:table; border-right: 20px">
+<div style="display:table;width:100%; padding: 20px 20px 20px 20px">
 	<div style="display:table-row">
-		<div style="display:table-cell">
+
+
+		<div style="display: table-cell;vertical-align: middle; padding-left: 40px;">
 			<img class="nav-button" src="./images/previous.png" onclick="onPrevious();"/>
 		</div>
-		<div style="display:table-cell">
+
+		<div style="display:table-cell; vertical-align: top; ">
 <pre>
-e | -- <input id="x_note" name="x_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarString(event,this)"/> --
-B | -- <input id="b_note" name="b_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarString(event,this)"/> --
-G | -- <input id="g_note" name="g_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarString(event,this)"/> --
-D | -- <input id="d_note" name="d_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarString(event,this)"/> --
-A | -- <input id="a_note" name="a_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarString(event,this)"/> --
-E | -- <input id="e_note" name="e_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarString(event,this)"/> --
+e | -- <input id="x_note" name="x_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
+B | -- <input id="b_note" name="b_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
+G | -- <input id="g_note" name="g_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
+D | -- <input id="d_note" name="d_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
+A | -- <input id="a_note" name="a_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
+E | -- <input id="e_note" name="e_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
 </pre>
 		</div>
-		<div style="display:table-cell">
-		<img class="nav-button" src="./images/next.png" onclick="onNext();"/>
+		<div style="display: table-cell;vertical-align: middle; padding-left: 20px">
+		    <img class="nav-button" src="./images/next.png" onclick="onNext();"/>
 		</div>
+
+        <div style="display: table-cell;vertical-align: top; padding-right: 20px; text-align: left; border-right: 1px solid #ddd;">
+            Commands:<br><br>
+            <input type="button" value="Insert Bar"><br><br>
+            <input type="button" value="Insert Note">
+
+
+        </div>
+
+        <div style="display: table-cell;vertical-align: top; padding-right: 20px; padding-left: 20px; text-align: left; border-right: 1px solid #ddd;">
+            Prefix Options:
+            <ul>
+                <li>h = is for hammer on</li>
+                <li>/ = slide into a note from below</li>
+                <li>\ = slide into a note from above</li>
+            </ul>
+        </div>
+
+        <div style="display: table-cell;vertical-align: top; padding-right: 20px; padding-left: 20px; text-align: left; border-right: 1px solid #ddd;">
+            Postfix Options:
+            <ul>
+                <li>g = is for grace note</li>
+                <li>p = is for pull off</li>
+                <li>b = bend</li>
+                <li>~ = vibrato</li>
+            </ul>
+        </div>
+
 	</div>
 </div>
 
 <hr/>
-
 <hr/>
-The following is the generated ASCII tab that you can select and copy to the clipboard for
-inclusion in your text document.
+<p>
+    The following is the generated ASCII tab that you can select and copy to the clipboard for
+    inclusion in your text document.
+</p>
+
+<p>
+    <div style="display:table;padding: 10px 10px 10px 10px">
+        <div style="display:table-row">
+            <div style="display: table-cell;">
+                Current note index:
+            </div>
+            <div style="display: table-cell; padding-left: 20px;">
+                <input id="html_current_index" type="text">
+            </div>
+        </div>
+        <div style="display:table-row">
+            <div style="display: table-cell;">
+                Minimum spaces between notes:
+            </div>
+            <div style="display: table-cell; padding-left: 20px;">
+                <input id="html_min_spaces" type="text">
+            </div>
+        </div>
+        <div style="display:table-row">
+            <div style="display: table-cell;">
+                Maximum line length:
+            </div>
+            <div style="display: table-cell; padding-left: 20px;">
+                <input id="html_max_line_length" type="text">
+            </div>
+        </div>
+    </div>
+
+</p>
+
 <pre>
-   <div id="note_marker" class="guitar-string-no-edit"></div>
    <div id="chord_name" class="guitar-string-no-edit"></div>
 
 e |<div id="x_string" class="guitar-string-no-edit"></div>
@@ -326,38 +555,12 @@ D |<div id="d_string" class="guitar-string-no-edit"></div>
 A |<div id="a_string" class="guitar-string-no-edit"></div>
 E |<div id="e_string" class="guitar-string-no-edit"></div>
 </pre>
+
 <br/>
 <hr/>
-<div id="remaining_status" class="status"/>
-<h2>Instructions</h2>
-This page provides a simple way to create guitar tabs that can be copied from the web page
-into your text documents.  
-<p>
-The guitar strings are labeled on the left with the lowercase e for the high E string.  Tab lines
-are numberd 1 through 6 which is the standard string numbering where "1" is the high E string and 
-2 is the B" string, etc...
-<p>
-The following is an example of an E, F and G chord in ASCII tab.
-<pre>
-      E  F  G
-e | --0--1--3--
-B | --0--1--0--
-G | --1--2--0--
-D | --2--3--0--
-A | --2--3--2--
-E | --0--1--3--
-</pre>
-The letters above the staff represent the chord name.  This program will automatically add the
-chord name if a common chord is detected.
+<div id="remaining_status" class="status"></div>
 <p>
 After creating your tab, simply select the generated ASCII tab and copy/paste into your ASCII text document.
+</p>
 </body>
 </html>
-
-<!--
-NOTES:
-- consider using bootstrap for styling.
-- here's a good reference page for CCS properties:
-  http://www.pageresource.com/dhtml/cssprops.htm#classification_properties
-
--->
