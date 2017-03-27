@@ -5,64 +5,7 @@
     <!-- load an external font so we can us it when displaying the tab -->
     <link type="text/css" href="https://fonts.googleapis.com/css?family=Source+Code+Pro:300,400,700" rel="stylesheet">
 
-<!--
-TODO - add description
-TODO - add author
-TODO - add license
-TODO - add dev notes.
 
-This code follows the Google JavaScript Style Guide.
-https://google.github.io/styleguide/javascriptguide.xml
-
-
-
-Strumming patterns:
-not length ???
-_ up
-^ down
-
-Typical 4 quarter notes shows down strumming on each note
-1 & 2 & 3 & 4 & | 1 & 2 & 3 & 4 &
-_   _   _   _
-
-1 & 2 & 3 & 4 &
-
-Standard Tab notation:
-e|-------------15----14----|-------------15----14----|
-B|----15-------------------|----15-------------------|
-G|-------14-12----14----14-|-------14-12----14----14-|
-D|-12----------------------|-12----------------------| x2
-A|-------------------------|-------------------------|
-E|-------------------------|-------------------------|
-
-Song part
-[Intro]
-[Chorus]
-
-Only include the symbols used.
-***********************************
-| /   Slide up
-| \   Slide down
-| h   Hummer-on
-| p   Pull-off
-| ~   Vibrato
-| +   Harmonic
-| x   Dead note
-| b   Bend
-| pb  Pre-bend
-| br  Bend release
-| pbr Pre-bend release
-| brb Bend release bend
-***********************************
-
-N.C. means no chord.
-
-Chords:
-Am 577555
-Em7 x79787
-Cmaj7 x-x-10-12-12-12
-
- -->
 
 <script language="javascript">
 	// Each array is associated with a guitar string.
@@ -79,15 +22,7 @@ Cmaj7 x-x-10-12-12-12
 	var gbl_a_array = [];
 	var gbl_e_array = [];
 	
-	// TODO - we need to include note types to distinguish
-	// whole notes, quarter, either and 16th notes to
-	// improve the readability.
-	
-	// TODO - we need to include an import mechanism based on
-	// a standard ASCII tab format so that songs can be reimported
-	// and modified easily.  https://en.wikipedia.org/wiki/Tablature
-	
-	
+
 	// This is the note that is being modified.  Of course we start on the first note.
 	var gbl_note_index = 0;
 	// Calculated during onLoad.  This field defines how many
@@ -101,13 +36,13 @@ Cmaj7 x-x-10-12-12-12
 
 	
 	function addNotesToFret() {	
-		console.log("addNotesToFret called")
-		var x_note_value = getNoteValue("x_note")
-		var b_note_value = getNoteValue("b_note")
-		var g_note_value = getNoteValue("g_note")
-		var d_note_value = getNoteValue("d_note")
-		var a_note_value = getNoteValue("a_note")
-		var e_note_value = getNoteValue("e_note")
+		console.log("addNotesToFret called");
+		var x_note_value = getNoteValue("x_note");
+		var b_note_value = getNoteValue("b_note");
+		var g_note_value = getNoteValue("g_note");
+		var d_note_value = getNoteValue("d_note");
+		var a_note_value = getNoteValue("a_note");
+		var e_note_value = getNoteValue("e_note");
 		console.log("guitar string values = high-e(" + x_note_value + "), b(" + b_note_value +
 			") g(" + g_note_value + ") d(" + d_note_value +
 			") a(" + a_note_value + ") low-e(" + e_note_value + ")");					
@@ -202,17 +137,18 @@ Cmaj7 x-x-10-12-12-12
 	 *
      */
 	function displayFretBoardNote(element_name, note, max_note_length, debug) {
-        var display_element = document.getElementById(element_name)
+        var display_element = document.getElementById(element_name);
         var output = display_element.innerHTML;
 
-        var note_value = note.trim();
-        if (note_value.empty || note_value == " ") {
+        var note_value;
+        note_value = note.trim();
+        if (note_value.empty || note_value === " ") {
             note_value = "-"
         }
 
         var spaces_before_note = max_note_length + gbl_min_space_between_notes - note_value.length;
 
-        if (debug == true && note != "-") {
+        if ((debug === true) && (note !== "-")) {
             console.log("Max note length(" + max_note_length +
                 ") note length(" + note_value.length +
                 ") spaces before note(" + spaces_before_note + ")");
@@ -229,10 +165,10 @@ Cmaj7 x-x-10-12-12-12
 
 	
 	function getNoteValue(elementName) {
-		console.log("getNoteValue() called for element(" + elementName + ")")
-		var element = document.getElementById(elementName)
-		var value = element.value		
-		if (value == null) {
+		console.log("getNoteValue() called for element(" + elementName + ")");
+		var element = document.getElementById(elementName);
+		var value = element.value;
+		if (value === null) {
 			return "-"
 		}
 		return value
@@ -248,7 +184,7 @@ Cmaj7 x-x-10-12-12-12
 	function isGuitarNote(evt, control) {
 		var charCode = (evt.which) ? evt.which : evt.keyCode;
 
-        if (charCode==13) {
+        if (charCode === 13) {
             // enter key pressed so use this as next
         	addNotesToFret();
             onNext();
@@ -261,18 +197,18 @@ Cmaj7 x-x-10-12-12-12
 		// 48 which is decimal 0 and 57 which is decimal 9.
         if (charCode < 48 || charCode > 57) {
             // the character isn't a number so perform some additional checks.
-            if ((charCode != 88) &&   // x dead note
-                (charCode != 8) &&    // backspace
-                (charCode != 72) &&    // h
-                (charCode != 191) &&    // / forward slash
-                (charCode != 220) &&    // \ backslash
-                (charCode != 71) &&    // g
-                (charCode != 80) &&    // p
-                (charCode != 66) &&    // b
-                (charCode != 192) &&    // ~
-                (charCode != 220)) {    // | bar separator
+            if ((charCode !== 88) &&   // x dead note
+                (charCode !== 8) &&    // backspace
+                (charCode !== 72) &&    // h
+                (charCode !== 191) &&    // / forward slash
+                (charCode !== 220) &&    // \ backslash
+                (charCode !== 71) &&    // g
+                (charCode !== 80) &&    // p
+                (charCode !== 66) &&    // b
+                (charCode !== 192) &&    // ~
+                (charCode !== 220)) {    // | bar separator
 
-			    console.log("not a guitar string")
+			    console.log("not a guitar string");
                 // clear the input
                 control.value = "";
 				return false;
@@ -287,7 +223,7 @@ Cmaj7 x-x-10-12-12-12
      * and show the values in the input boxes.
      */
 	function loadNotesFromArray() {
-		console.log("loadNotesFromArray() called")
+		console.log("loadNotesFromArray() called");
 		var x_note_value = gbl_x_array[gbl_note_index];
 		var b_note_value = gbl_b_array[gbl_note_index];
 		var g_note_value = gbl_g_array[gbl_note_index];
@@ -315,15 +251,15 @@ Cmaj7 x-x-10-12-12-12
      */
     function onLoad() {
         gbl_max_notes = gbl_line_length / (gbl_min_space_between_notes + 1);
-        console.log("A maximum of (" + gbl_max_notes + ") notes can be added to each line.")
+        console.log("A maximum of (" + gbl_max_notes + ") notes can be added to each line.");
 
         for (var x=0; x<gbl_max_notes; x++) {
-            gbl_x_array.push("-")
-            gbl_b_array.push("-")
-            gbl_g_array.push("-")
-            gbl_d_array.push("-")
-            gbl_a_array.push("-")
-            gbl_e_array.push("-")
+            gbl_x_array.push("-");
+            gbl_b_array.push("-");
+            gbl_g_array.push("-");
+            gbl_d_array.push("-");
+            gbl_a_array.push("-");
+            gbl_e_array.push("-");
         }
 
         displayFretBoard();
@@ -373,9 +309,9 @@ Cmaj7 x-x-10-12-12-12
      * @param value - the value to set
      */
 	function setNoteValue(elementId, value) {
-		console.log("setNoteValue() called for element(" + elementId + ") and value(" + value + ")")
-		var element = document.getElementById(elementId)
-        if (value == "-") {
+		console.log("setNoteValue() called for element(" + elementId + ") and value(" + value + ")");
+		var element = document.getElementById(elementId);
+        if (value === "-") {
 		    value = " ";
         }
 		element.value = value;		
@@ -387,29 +323,30 @@ Cmaj7 x-x-10-12-12-12
 	    element.value = gbl_note_index;
 	    element.setAttribute("readonly", "true");
 
-        var element = document.getElementById("html_min_spaces");
+        element = document.getElementById("html_min_spaces");
         element.value = gbl_min_space_between_notes;
         element.setAttribute("readonly", "true");
 
-        var element = document.getElementById("html_max_line_length");
+        element = document.getElementById("html_max_line_length");
         element.value = gbl_line_length;
         element.setAttribute("readonly", "true");
-
     }
 
 
 </script>
 
 <style type="text/css">
-.guitar-string {
-	font-size: 14px;
-	cursor: crosshair;
-	display:  inline;
-}
+/*.guitar-string {*/
+	/*font-size: 14px;*/
+	/*cursor: crosshair;*/
+	/*display:  inline;*/
+/*}*/
 .guitar-note {
-	font-size: 14px;
+	font-size: 24px;
 	display:  inline;
     text-align: center;
+    font-family: 'Source Code Pro', monospace;
+    font-weight: 300;
 }
 .guitar-string-no-edit {
 	font-size: 16px;
@@ -417,9 +354,9 @@ Cmaj7 x-x-10-12-12-12
     font-family: 'Source Code Pro', monospace;
     font-weight: 300;
 }
-.add-button {
-	vertical-align: bottom;
-}
+/*.add-button {*/
+	/*vertical-align: bottom;*/
+/*}*/
 .status {
 	.display: block;
 }
@@ -466,12 +403,12 @@ note to the staff.
 
 		<div style="display:table-cell; vertical-align: top; ">
 <pre>
-e | -- <input id="x_note" name="x_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
-B | -- <input id="b_note" name="b_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
-G | -- <input id="g_note" name="g_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
-D | -- <input id="d_note" name="d_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
-A | -- <input id="a_note" name="a_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
-E | -- <input id="e_note" name="e_note" type="text" size="1" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
+    <label for="x_note">e | -- </label><input id="x_note" name="x_note" type="text" size="4" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
+    <label for="b_note">B | -- </label><input id="b_note" name="b_note" type="text" size="4" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
+    <label for="g_note">G | -- </label><input id="g_note" name="g_note" type="text" size="4" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
+    <label for="d_note">D | -- </label><input id="d_note" name="d_note" type="text" size="4" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
+    <label for="a_note">A | -- </label><input id="a_note" name="a_note" type="text" size="4" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
+    <label for="e_note">E | -- </label><input id="e_note" name="e_note" type="text" size="4" class="guitar-note" onkeyup="return isGuitarNote(event,this)"/> --
 </pre>
 		</div>
 		<div style="display: table-cell;vertical-align: middle; padding-left: 20px">
